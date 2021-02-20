@@ -1,0 +1,43 @@
+# Docker Compose file Reference (https://docs.docker.com/compose/compose-file/)
+version: '3'
+
+#Define services
+services:
+
+  #PostgreSQL Database for the application
+  vdf-postgres:
+    image: "postgres:9.6-alpine"
+    container_name: vdf-postgres
+    #Volume mounted for database for the storage
+    volumes:
+      - scrum-data:/var/lib/postgresql/data
+    ports:
+      - 5459:5432 # Forward the exposed port 5459 on the container to port 5432 on the host machine
+
+    #Environment variable for DB name, user and password
+    environment:
+      - POSTGRES_DB=test
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=ny123456
+
+  #Back-end Spring Boot Application
+  vdf-spring-app:
+    #The docker file in  build the jar and provides the docker image with the following name.
+    build: .
+    container_name: vdf-spring-app
+
+    #Environment variables for Spring Boot Application.
+    environment:
+      - DB_SERVER=vdf-postgres
+      - POSTGRES_DB=test
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=ny123456
+    ports:
+      - 8090:8090 # Forward the exposed port 8090 on the container to port 8090 on the host machine
+    links:
+      - vdf-postgres
+
+
+#Volumes for DB data
+volumes:
+  scrum-data:
